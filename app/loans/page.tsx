@@ -49,7 +49,7 @@ export default function LoansPage() {
     },
     {
       icon: <FileText className="h-6 w-6 text-purple-400" />,
-      title: "Minimal Documentation",
+      title: "Minimal Documentation and process",
       description: "Simple paperwork with Aadhaar-based KYC",
       gradient: "from-purple-500/20 via-transparent to-transparent"
     }
@@ -59,7 +59,7 @@ export default function LoansPage() {
     {
       icon: <Users className="h-6 w-6 text-indigo-400" />,
       title: "Group Membership",
-      description: "Be part of a Finergise savings group for 3+ months",
+      description: "Be part of a Finergise savings group for 4+ months",
       gradient: "from-indigo-500/20 via-transparent to-transparent"
     },
     {
