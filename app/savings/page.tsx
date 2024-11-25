@@ -5,25 +5,28 @@ import { Users, Wallet, Calculator, Shield, ArrowRight, PiggyBank, TrendingUp } 
 export default function SavingsPage() {
   const savingsGroups = [
     {
-      icon: <PiggyBank className="w-12 h-12 text-blue-500" />,
+      icon: <PiggyBank className="w-12 h-12 text-blue-500/80" />,
       title: "Daily Savings Group",
       description: "Save small amounts daily with your community members",
       amount: "₹50-500 daily",
-      members: "10-20 members"
+      members: "10-20 members",
+      gradient: "from-blue-500/20 via-transparent to-transparent"
     },
     {
-      icon: <Users className="w-12 h-12 text-purple-500" />,
+      icon: <Users className="w-12 h-12 text-purple-500/80" />,
       title: "Weekly Savings Circle",
       description: "Pool money weekly for group investments and loans",
       amount: "₹500-2000 weekly",
-      members: "15-30 members"
+      members: "15-30 members",
+      gradient: "from-purple-500/20 via-transparent to-transparent"
     },
     {
-      icon: <TrendingUp className="w-12 h-12 text-green-500" />,
+      icon: <TrendingUp className="w-12 h-12 text-green-500/80" />,
       title: "Monthly Investment Club",
       description: "Long-term savings with higher returns",
       amount: "₹1000-5000 monthly",
-      members: "20-50 members"
+      members: "20-50 members",
+      gradient: "from-green-500/20 via-transparent to-transparent"
     }
   ];
 
@@ -31,17 +34,20 @@ export default function SavingsPage() {
     {
       icon: <Calculator className="h-6 w-6 text-blue-400" />,
       title: "Higher Interest Rates",
-      description: "Earn up to 12% annual interest on group savings"
+      description: "Earn up to 12% annual interest on group savings",
+      gradient: "from-blue-500/20 via-transparent to-transparent"
     },
     {
       icon: <Shield className="h-6 w-6 text-green-400" />,
       title: "Secure Savings",
-      description: "Bank-grade security for all group funds"
+      description: "Bank-grade security for all group funds",
+      gradient: "from-green-500/20 via-transparent to-transparent"
     },
     {
       icon: <Wallet className="h-6 w-6 text-purple-400" />,
       title: "Easy Access",
-      description: "Withdraw funds when needed with group consensus"
+      description: "Withdraw funds when needed with group consensus",
+      gradient: "from-purple-500/20 via-transparent to-transparent"
     }
   ];
 
@@ -53,7 +59,7 @@ export default function SavingsPage() {
       <section className="pt-24 pb-12">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 text-transparent bg-clip-text">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-400 text-transparent bg-clip-text leading-[1.3] py-2">
               Community Savings Groups
             </h1>
             <p className="text-gray-400 text-lg md:text-xl mb-8">
@@ -71,9 +77,11 @@ export default function SavingsPage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {savingsGroups.map((group, index) => (
-              <Card key={index} className="bg-gray-900/50 border-gray-800 hover:border-gray-700">
+              <Card key={index} className="group bg-gray-900/50 border-gray-800 hover:border-gray-700">
                 <CardHeader>
-                  <div className="mb-4">{group.icon}</div>
+                  <div className={`p-4 rounded-lg bg-gradient-to-r ${group.gradient} group-hover:scale-110 transition-transform duration-300`}>
+                    {group.icon}
+                  </div>
                   <CardTitle className="text-white text-2xl">{group.title}</CardTitle>
                   <CardDescription className="text-gray-400">{group.description}</CardDescription>
                 </CardHeader>
@@ -103,8 +111,8 @@ export default function SavingsPage() {
             <h2 className="text-2xl font-bold text-white mb-8 text-center">Benefits of Group Savings</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-start space-x-4">
-                  <div className="p-3 bg-gray-800 rounded-lg">
+                <div key={index} className="flex items-start space-x-4 group">
+                  <div className={`p-3 rounded-lg bg-gradient-to-r ${benefit.gradient} group-hover:scale-110 transition-transform duration-300`}>
                     {benefit.icon}
                   </div>
                   <div>

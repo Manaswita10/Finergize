@@ -87,12 +87,11 @@ export default function Home() {
         </span>
       </div>
 
-
-     <h1 className="font-bold mb-6">
-        <span className="text-7xl md:text-8xl lg:text-9xl bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 text-transparent bg-clip-text animate-gradient inline-block leading-tight tracking-tighter">
-          Finergise
-        </span>
-     </h1>
+      <h1 className="font-bold mb-6">
+              <span className="text-7xl md:text-8xl lg:text-9xl bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 text-transparent bg-clip-text animate-gradient inline-block leading-[1.3] tracking-tighter py-4">
+                Finergize
+              </span>
+            </h1>
       <p className="text-gray-400 text-xl md:text-2xl mb-12 max-w-3xl mx-auto">
         Join millions building a better financial future with secure banking, savings, and community-driven growth.
       </p>
