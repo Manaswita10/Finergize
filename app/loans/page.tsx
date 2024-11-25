@@ -59,7 +59,7 @@ export default function LoansPage() {
     {
       icon: <Users className="h-6 w-6 text-indigo-400" />,
       title: "Group Membership",
-      description: "Be part of a Finergise savings group for 3+ months",
+      description: "Be part of a Finergise savings group for 4+ months",
       gradient: "from-indigo-500/20 via-transparent to-transparent"
     },
     {
