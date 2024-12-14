@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ArrowRight, Wallet, Users, Lock, Fingerprint, AlertCircle, CheckCircle2, BadgeIndianRupee } from 'lucide-react';
-//import Link from "next/link";
+import Link from "next/link";
 
 export default function SecureTransferPage() {
   const transferTypes = [
@@ -11,7 +11,8 @@ export default function SecureTransferPage() {
       description: "Send money directly to other Finergise users",
       limit: "Up to ₹1,00,000 per day",
       fee: "No transfer fee",
-      gradient: "from-blue-500/20 via-transparent to-transparent"
+      gradient: "from-blue-500/20 via-transparent to-transparent",
+      href: "/transfers/peer"
     },
     {
       icon: <BadgeIndianRupee className="w-12 h-12 text-purple-500/80" />,
@@ -19,7 +20,8 @@ export default function SecureTransferPage() {
       description: "Transfer to any bank account via UPI/IMPS",
       limit: "Up to ₹2,00,000 per day",
       fee: "Free for basic transfers",
-      gradient: "from-purple-500/20 via-transparent to-transparent"
+      gradient: "from-purple-500/20 via-transparent to-transparent",
+      href: "/transfers/bank"
     },
     {
       icon: <Wallet className="w-12 h-12 text-emerald-500/80" />,
@@ -27,7 +29,8 @@ export default function SecureTransferPage() {
       description: "Send to popular mobile wallets instantly",
       limit: "Up to ₹50,000 per transfer",
       fee: "No additional charges",
-      gradient: "from-emerald-500/20 via-transparent to-transparent"
+      gradient: "from-emerald-500/20 via-transparent to-transparent",
+      href: "/transfers/wallet"
     }
   ];
 
@@ -87,40 +90,44 @@ export default function SecureTransferPage() {
             <p className="text-gray-400 text-lg md:text-xl mb-8">
               Send money securely and instantly to anyone, anywhere
             </p>
-            <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90">
-              Start Transfer <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <Link href="#transfer-types">
+              <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90">
+                Start Transfer <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
       {/* Transfer Types */}
-      <section className="py-12">
+      <section id="transfer-types" className="py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {transferTypes.map((type, index) => (
-              <Card key={index} className="group bg-gray-900/50 border-gray-800 hover:border-gray-700">
-                <CardHeader>
-                  <div className={`p-4 rounded-lg bg-gradient-to-r ${type.gradient} group-hover:scale-110 transition-transform duration-300`}>
-                    {type.icon}
-                  </div>
-                  <CardTitle className="text-white text-2xl">{type.title}</CardTitle>
-                  <CardDescription className="text-gray-400">{type.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 mb-4">
-                    <p className="text-gray-400">
-                      <span className="font-semibold text-white">Limit:</span> {type.limit}
-                    </p>
-                    <p className="text-gray-400">
-                      <span className="font-semibold text-white">Fee:</span> {type.fee}
-                    </p>
-                  </div>
-                  <Button className="w-full bg-blue-500 hover:bg-blue-600">
-                    Transfer Now <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
+              <Link href={type.href} key={index} className="block">
+                <Card className="group bg-gray-900/50 border-gray-800 hover:border-gray-700 transition-all duration-300 hover:scale-105">
+                  <CardHeader>
+                    <div className={`p-4 rounded-lg bg-gradient-to-r ${type.gradient} group-hover:scale-110 transition-transform duration-300`}>
+                      {type.icon}
+                    </div>
+                    <CardTitle className="text-white text-2xl">{type.title}</CardTitle>
+                    <CardDescription className="text-gray-400">{type.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2 mb-4">
+                      <p className="text-gray-400">
+                        <span className="font-semibold text-white">Limit:</span> {type.limit}
+                      </p>
+                      <p className="text-gray-400">
+                        <span className="font-semibold text-white">Fee:</span> {type.fee}
+                      </p>
+                    </div>
+                    <Button className="w-full bg-blue-500 hover:bg-blue-600">
+                      Transfer Now <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
@@ -182,9 +189,11 @@ export default function SecureTransferPage() {
               <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
                 Experience fast and secure money transfers with just a few clicks.
               </p>
-              <Button size="lg" className="bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90">
-                Start Transfer Now <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              <Link href="#transfer-types">
+                <Button size="lg" className="bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90">
+                  Start Transfer Now <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

@@ -2,8 +2,17 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
+import { useSession, signOut } from "next-auth/react";
 
 const navItems = [
   {
@@ -38,6 +47,29 @@ const navItems = [
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+  const { data: session, status } = useSession();
+
+  const handleLogout = async () => {
+    try {
+      await signOut({ redirect: false });
+      
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out"
+      });
+      
+      router.push('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      toast({
+        title: "Logout Failed",
+        description: "An error occurred during logout",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-lg border-b border-gray-800">
@@ -63,18 +95,45 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Auth Buttons - Desktop */}
+          {/* Auth Buttons or Profile Menu - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link href="/login">
-              <Button variant="outline" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10">
-                Login
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90">
-                Register
-              </Button>
-            </Link>
+            {status === "authenticated" ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="rounded-full w-10 h-10 bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/20 hover:to-purple-500/20"
+                  >
+                    <User className="h-5 w-5 text-blue-400" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-gray-900 border-gray-800">
+                  <DropdownMenuItem className="text-gray-300 focus:text-white focus:bg-gray-800">
+                    <Link href="/profile" className="w-full">{session?.user?.name || 'My Profile'}</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    className="text-gray-300 focus:text-white focus:bg-gray-800 cursor-pointer"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="outline" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10">
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90">
+                    Register
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -109,21 +168,42 @@ export default function Navbar() {
                 </Link>
               ))}
               <div className="pt-4 flex flex-col space-y-2">
-                <Link href="/login">
-                  <Button 
-                    variant="outline" 
-                    className="w-full border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
-                  >
-                    Login
-                  </Button>
-                </Link>
-                <Link href="/register">
-                  <Button 
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90"
-                  >
-                    Register
-                  </Button>
-                </Link>
+                {status === "authenticated" ? (
+                  <>
+                    <Link href="banking/profile">
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                      >
+                        {session?.user?.name || 'My Profile'}
+                      </Button>
+                    </Link>
+                    <Button 
+                      className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login">
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                      >
+                        Login
+                      </Button>
+                    </Link>
+                    <Link href="/register">
+                      <Button 
+                        className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90"
+                      >
+                        Register
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
