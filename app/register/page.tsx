@@ -7,13 +7,41 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { signIn } from "next-auth/react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Shield, Languages, Check, Lock } from 'lucide-react';
+
+// Animation variants
+const pageVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" }
+  }
+};
+
+const inputVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    transition: { duration: 0.3 }
+  }
+};
+
+const formGroupVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
 interface FormData {
   name: string;
@@ -25,6 +53,65 @@ interface FormData {
   aadhaarNumber: string;
   preferredLanguage: string;
 }
+
+const AnimatedGradientBackground = () => (
+  <div className="fixed inset-0 -z-10">
+    {/* Main gradient */}
+    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-900/30 via-gray-900 to-black"></div>
+    
+    {/* Animated orbs */}
+    <motion.div 
+      className="absolute w-[1000px] h-[1000px] -left-[400px] -top-[400px] rounded-full bg-blue-500/10 blur-[120px]"
+      animate={{
+        scale: [1, 1.2, 1],
+        opacity: [0.1, 0.2, 0.1],
+      }}
+      transition={{
+        duration: 10,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+    />
+    <motion.div 
+      className="absolute w-[1000px] h-[1000px] -right-[400px] -bottom-[400px] rounded-full bg-purple-500/10 blur-[120px]"
+      animate={{
+        scale: [1.2, 1, 1.2],
+        opacity: [0.2, 0.1, 0.2],
+      }}
+      transition={{
+        duration: 10,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+    />
+    
+    {/* Grid overlay */}
+    <div className="absolute inset-0 bg-grid-white/[0.02]" />
+    
+    {/* Decorative lines */}
+    <div className="absolute inset-0">
+      <div className="absolute top-1/4 w-full h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
+      <div className="absolute bottom-1/4 w-full h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
+    </div>
+  </div>
+);
+
+const InputField = ({ label, id, ...props }: { label: string; id: string; [key: string]: any }) => (
+  <motion.div 
+    variants={inputVariants}
+    className="space-y-2"
+  >
+    <Label htmlFor={id} className="text-gray-300">{label}</Label>
+    <div className="relative group">
+      <Input
+        id={id}
+        className="bg-gray-900/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-purple-500 focus:ring-purple-500/20 h-11 transition-all duration-300"
+        {...props}
+      />
+      <div className="absolute inset-x-0 h-px bottom-0 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent scale-x-0 group-focus-within:scale-x-100 transition-transform duration-500" />
+    </div>
+  </motion.div>
+);
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -46,7 +133,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/users/register", {
+      const registerResponse = await fetch("/api/users/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -54,21 +141,36 @@ export default function RegisterPage() {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      const registerData = await registerResponse.json();
 
-      if (response.ok) {
+      if (!registerResponse.ok) {
+        throw new Error(registerData.message || "Registration failed");
+      }
+
+      const signInResult = await signIn('credentials', {
+        phone: formData.phone,
+        aadhaarNumber: formData.aadhaarNumber,
+        redirect: false,
+      });
+
+      if (signInResult?.ok) {
         toast({
           title: "Registration Successful",
-          description: "You can now log in to your account"
+          description: "Your account has been created and you're now logged in!"
+        });
+        router.push("/banking/dashboard");
+      } else {
+        toast({
+          title: "Registration Successful",
+          description: "Please log in with your credentials"
         });
         router.push("/login");
-      } else {
-        throw new Error(data.message || "Registration failed");
       }
     } catch (error) {
       toast({
         title: "Registration Failed",
-        description: error instanceof Error ? error.message : "Something went wrong"
+        description: error instanceof Error ? error.message : "Something went wrong",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -79,127 +181,268 @@ export default function RegisterPage() {
     setFormData(prev => ({ ...prev, preferredLanguage: value }));
   };
 
+  const validateInput = (field: keyof FormData, value: string) => {
+    switch (field) {
+      case 'phone':
+        return value.match(/^[0-9]{10}$/) ? true : 'Phone number must be 10 digits';
+      case 'aadhaarNumber':
+        return value.match(/^[0-9]{12}$/) ? true : 'Aadhaar number must be 12 digits';
+      case 'pincode':
+        return value.match(/^[0-9]{6}$/) ? true : 'PIN code must be 6 digits';
+      default:
+        return true;
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    const validationResult = validateInput(id as keyof FormData, value);
+
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
+
+    if (validationResult !== true) {
+      toast({
+        title: "Invalid Input",
+        description: validationResult,
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
-    <main className="min-h-screen bg-black pt-24 pb-12">
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-gray-900 to-black"></div>
+    <div className="min-h-screen bg-black relative">
+      <AnimatedGradientBackground />
+      
+      <main className="relative pt-24 pb-12">
+        <div className="container max-w-2xl mx-auto px-4">
+          {/* Security Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center gap-2 mb-6 p-3 rounded-lg bg-gray-900/50 border border-gray-800/50 backdrop-blur-sm w-fit mx-auto"
+          >
+            <Shield className="h-5 w-5 text-purple-500" />
+            <span className="text-sm text-gray-300">Secured Registration Process</span>
+          </motion.div>
 
-      <div className="container mx-auto px-4">
-        <Card className="max-w-2xl mx-auto bg-gray-900/50 border-gray-800">
-          <CardHeader>
-            <CardTitle className="text-2xl text-white">Create Your Account</CardTitle>
-            <CardDescription>Join our community of rural digital banking</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    placeholder="Enter your full name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                </div>
+          <motion.div
+            variants={pageVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <Card className="bg-gray-900/40 border-gray-800/50 backdrop-blur-sm overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5" />
+              
+              <CardHeader className="relative">
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
+                <CardTitle className="text-2xl text-white flex items-center gap-2">
+                  Create Your Account
+                  <motion.span
+                    animate={{ rotate: [0, 10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    ✨
+                  </motion.span>
+                </CardTitle>
+                <CardDescription className="text-gray-400">
+                  Join our community of rural digital banking
+                </CardDescription>
+              </CardHeader>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    placeholder="10-digit phone number"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    pattern="[0-9]{10}"
-                    required
-                  />
-                </div>
+              <CardContent className="relative">
+                <form onSubmit={handleSubmit}>
+                  <motion.div 
+                    variants={formGroupVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
+                  >
+                    <InputField
+                      label="Full Name"
+                      id="name"
+                      placeholder="Enter your full name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                    />
 
-                <div className="space-y-2">
-                  <Label htmlFor="village">Village</Label>
-                  <Input
-                    id="village"
-                    placeholder="Your village name"
-                    value={formData.village}
-                    onChange={(e) => setFormData({ ...formData, village: e.target.value })}
-                    required
-                  />
-                </div>
+                    <InputField
+                      label="Phone Number"
+                      id="phone"
+                      placeholder="10-digit phone number"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      pattern="[0-9]{10}"
+                      required
+                      minLength={10}
+                      maxLength={10}
+                    />
 
-                <div className="space-y-2">
-                  <Label htmlFor="district">District</Label>
-                  <Input
-                    id="district"
-                    placeholder="Your district"
-                    value={formData.district}
-                    onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                    required
-                  />
-                </div>
+                    <InputField
+                      label="Village"
+                      id="village"
+                      placeholder="Your village name"
+                      value={formData.village}
+                      onChange={handleInputChange}
+                      required
+                    />
 
-                <div className="space-y-2">
-                  <Label htmlFor="state">State</Label>
-                  <Input
-                    id="state"
-                    placeholder="Your state"
-                    value={formData.state}
-                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                    required
-                  />
-                </div>
+                    <InputField
+                      label="District"
+                      id="district"
+                      placeholder="Your district"
+                      value={formData.district}
+                      onChange={handleInputChange}
+                      required
+                    />
 
-                <div className="space-y-2">
-                  <Label htmlFor="pincode">PIN Code</Label>
-                  <Input
-                    id="pincode"
-                    placeholder="6-digit PIN code"
-                    value={formData.pincode}
-                    onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
-                    pattern="[0-9]{6}"
-                    required
-                  />
-                </div>
+                    <InputField
+                      label="State"
+                      id="state"
+                      placeholder="Your state"
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      required
+                    />
 
-                <div className="space-y-2">
-                  <Label htmlFor="aadhaar">Aadhaar Number</Label>
-                  <Input
-                    id="aadhaar"
-                    placeholder="12-digit Aadhaar number"
-                    value={formData.aadhaarNumber}
-                    onChange={(e) => setFormData({ ...formData, aadhaarNumber: e.target.value })}
-                    pattern="[0-9]{12}"
-                    required
-                  />
-                </div>
+                    <InputField
+                      label="PIN Code"
+                      id="pincode"
+                      placeholder="6-digit PIN code"
+                      value={formData.pincode}
+                      onChange={handleInputChange}
+                      pattern="[0-9]{6}"
+                      required
+                      minLength={6}
+                      maxLength={6}
+                    />
 
-                <div className="space-y-2">
-                  <Label htmlFor="language">Preferred Language</Label>
-                  <Select value={formData.preferredLanguage} onValueChange={handleLanguageChange}>
-                    <SelectTrigger id="language">
-                      <SelectValue placeholder="Select language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="hindi">Hindi</SelectItem>
-                      <SelectItem value="english">English</SelectItem>
-                      <SelectItem value="tamil">Tamil</SelectItem>
-                      <SelectItem value="telugu">Telugu</SelectItem>
-                      <SelectItem value="kannada">Kannada</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+                    <div className="relative group">
+                      <InputField
+                        label="Aadhaar Number"
+                        id="aadhaar"
+                        type="password"
+                        placeholder="12-digit Aadhaar number"
+                        value={formData.aadhaarNumber}
+                        onChange={(e) => setFormData({ ...formData, aadhaarNumber: e.target.value })}
+                        pattern="[0-9]{12}"
+                        required
+                        minLength={12}
+                        maxLength={12}
+                      />
+                      <Lock className="absolute right-3 top-[38px] h-4 w-4 text-gray-500" />
+                    </div>
 
-              <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90"
-                disabled={isLoading}
+                    <motion.div variants={inputVariants} className="space-y-2">
+                      <Label htmlFor="language" className="text-gray-300">Preferred Language</Label>
+                      <Select value={formData.preferredLanguage} onValueChange={handleLanguageChange}>
+                        <SelectTrigger 
+                          id="language"
+                          className="bg-gray-900/50 border-gray-700 text-white h-11 focus:ring-purple-500/20"
+                        >
+                          <Languages className="h-4 w-4 mr-2" />
+                          <SelectValue placeholder="Select language" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-900 border-gray-800">
+                          <SelectItem value="hindi">Hindi</SelectItem>
+                          <SelectItem value="english">English</SelectItem>
+                          <SelectItem value="tamil">Tamil</SelectItem>
+                          <SelectItem value="telugu">Telugu</SelectItem>
+                          <SelectItem value="kannada">Kannada</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </motion.div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="space-y-6"
+                  >
+                    <Button
+                      type="submit"
+                      className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center justify-center">
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="mr-2"
+                          >
+                            <svg className="h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          </motion.div>
+                          Creating Account...
+                        </div>
+                      ) : (
+                        <span className="flex items-center justify-center">
+                          Create Account
+                          <Check className="ml-2 h-5 w-5" />
+                        </span>
+                      )}
+                    </Button>
+
+                    <div className="text-center">
+                      <p className="text-sm text-gray-400">
+                      Already have an account?{" "}
+                        <motion.button
+                          type="button"
+                          onClick={() => router.push("/login")}
+                          className="text-purple-400 hover:text-purple-300 transition-colors"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Login here
+                        </motion.button>
+                      </p>
+                    </div>
+                  </motion.div>
+                </form>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Additional visual elements for loading state */}
+          <AnimatePresence>
+            {isLoading && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed bottom-8 right-8 z-50"
               >
-                {isLoading ? "Creating Account..." : "Create Account"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </main>
+                <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/20 backdrop-blur-sm">
+                  <div className="flex items-center space-x-3">
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.5, 1, 0.5]
+                      }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: Infinity
+                      }}
+                    >
+                      <div className="w-3 h-3 rounded-full bg-purple-500" />
+                    </motion.div>
+                    <p className="text-sm text-purple-400">
+                      Processing your registration...
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </main>
+    </div>
   );
 }

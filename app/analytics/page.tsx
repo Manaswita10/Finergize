@@ -1,7 +1,9 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ArrowRight, LineChart, PieChart, BarChart, Target, ArrowUpRight, Bell } from 'lucide-react';
-//import Link from "next/link";
+import Link from "next/link";
 
 export default function AnalyticsPage() {
   const analyticsTools = [
@@ -10,21 +12,24 @@ export default function AnalyticsPage() {
       title: "Savings Tracker",
       description: "Monitor your savings growth and patterns over time",
       features: ["Visual progress charts", "Goal tracking", "Monthly comparisons"],
-      gradient: "from-blue-500/20 via-transparent to-transparent"
+      gradient: "from-blue-500/20 via-transparent to-transparent",
+      href: "/banking/savings-tracker"
     },
     {
-      icon: <PieChart className="w-12 h-12 text-purple-500/80" />,
-      title: "Expense Analysis",
-      description: "Understand your spending habits and categories",
-      features: ["Category breakdown", "Trend analysis", "Expense alerts"],
-      gradient: "from-purple-500/20 via-transparent to-transparent"
+      icon: <LineChart className="w-12 h-12 text-red-500/80" />,
+      title: "Expense Tracker",
+      description: "Monitor your spending habits and identify areas for improvement",
+      features: ["Categorized spending", "Budgeting tools", "Visual representations"],
+      gradient: "from-red-500/20 via-transparent to-transparent",
+      href: "/banking/expense-tracker"
     },
     {
       icon: <BarChart className="w-12 h-12 text-emerald-500/80" />,
       title: "Income Insights",
       description: "Track all your income sources and growth",
       features: ["Income breakdown", "Growth metrics", "Future projections"],
-      gradient: "from-emerald-500/20 via-transparent to-transparent"
+      gradient: "from-emerald-500/20 via-transparent to-transparent",
+      href: "/banking/income-insights"
     }
   ];
 
@@ -92,9 +97,11 @@ export default function AnalyticsPage() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full bg-blue-500 hover:bg-blue-600">
-                    Access Tool
-                  </Button>
+                  <Link href={tool.href}>
+                    <Button className="w-full bg-blue-500 hover:bg-blue-600">
+                      Access Tool
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             ))}
@@ -146,3 +153,4 @@ export default function AnalyticsPage() {
     </main>
   );
 }
+
