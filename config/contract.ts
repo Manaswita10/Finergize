@@ -1,0 +1,12 @@
+// src/config/contract.ts
+export const MUTUAL_FUND_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+
+export const FUND_IDS = {
+    LARGE_CAP_GROWTH: "LARGE_CAP_001",
+    MID_CAP_OPP: "MID_CAP_002",
+    DEBT_FUND: "DEBT_003",
+    BALANCED_ADV: "BAL_ADV_004",
+    SMALL_CAP: "SMALL_CAP_005",
+    GOVT_SEC: "GOVT_SEC_006",
+    DYNAMIC_ASSET: "DYN_ASSET_007"
+};

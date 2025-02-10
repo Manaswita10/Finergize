@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
-  Wallet, ArrowUpRight, ArrowDownLeft, Users, Languages,
+  Wallet, ArrowUpRight, ArrowDownLeft, Languages,
   Phone, Volume2, ChevronRight, AlertCircle, Fingerprint,
   Brain, Send, Download, Upload, History, Shield, Banknote
 } from "lucide-react";
@@ -21,13 +21,6 @@ import { useSession } from "next-auth/react";
 import html2canvas from 'html2canvas';
 import TransactionReceipt from '@/components/TransactionReceipt';
 import { motion, AnimatePresence } from "framer-motion";
-
-// Animation variants for Framer Motion
-const fadeIn = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -20 }
-};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -225,7 +218,7 @@ export default function DashboardPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isVoiceEnabled, setIsVoiceEnabled] = useState<boolean>(false);
   const [selectedLanguage, setSelectedLanguage] = useState("english");
-  const [securityScore, setSecurityScore] = useState(85);
+  const [securityScore] = useState(85);
   const [isLoading, setIsLoading] = useState(true);
   const [monthlyChange, setMonthlyChange] = useState({ amount: 0, isPositive: true });
   const [pendingTxCount, setPendingTxCount] = useState(0);
@@ -265,7 +258,7 @@ export default function DashboardPage() {
       toast({
         title: "Error Loading Data",
         description: "Please refresh the page or try again later",
-        variant: "destructive",
+        
       });
     } finally {
       setIsLoading(false);
@@ -281,7 +274,7 @@ export default function DashboardPage() {
       toast({
         title: "Error",
         description: "Could not generate receipt. Please try again.",
-        variant: "destructive"
+        
       });
       return;
     }
@@ -298,7 +291,7 @@ export default function DashboardPage() {
         onclone: (clonedDoc) => {
           const element = clonedDoc.querySelector('[data-receipt]');
           if (element) {
-            element.style.visibility = 'visible';
+            (element as HTMLElement).style.visibility = 'visible';
           }
         }
       });
@@ -329,7 +322,7 @@ export default function DashboardPage() {
       toast({
         title: "Error",
         description: "Failed to generate receipt. Please try again.",
-        variant: "destructive"
+        
       });
     }
   };
@@ -345,7 +338,7 @@ export default function DashboardPage() {
       toast({
         title: "Authentication Required",
         description: "Please login to access this feature",
-        variant: "destructive",
+       
       });
       router.push('/login');
       return;
@@ -881,7 +874,7 @@ export default function DashboardPage() {
                       <Volume2 className="h-5 w-5 text-blue-400" />
                     </motion.div>
                     <p className="text-sm text-blue-400">
-                      Voice assistant active. Try saying "Send money" or "Check balance"
+                      Voice assistant active. Try saying &quot;Send money&quot; or &quot;Check balance&quot;
                     </p>
                   </div>
                 </div>

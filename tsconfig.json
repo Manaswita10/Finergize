@@ -23,11 +23,28 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "scripts/**/*.ts", "scripts/seedLoanProviders.js"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "hardhat.config.ts",
+    "scripts/**/*.ts",
+    "scripts/**/*.js",
+    "scripts/**/*.cjs",
+    "test/**/*.ts",
+    "typechain/**/*.ts",
+    "typechain/**/*.d.ts"
+  ],
   "exclude": ["node_modules"],
   "ts-node": {
     "compilerOptions": {
-      "module": "commonjs"
+      "module": "commonjs",
+      "resolveJsonModule": true,
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["./*"]
+      }
     }
   }
 }
