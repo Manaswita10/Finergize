@@ -1,169 +1,193 @@
-import React, { useState } from 'react';
-import MutualFundsDisplay from '@/components/mutual funds/MutualFundsDisplay';
-import InvestmentModal from '@/components/mutual funds/InvestmentModal';
-import TransactionHistory from '@/components/mutual funds/TransactionHistory';
-import PortfolioAnalytics from '@/components/mutual funds/PortfolioAnalytics';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+"use client";
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ChartBarIcon, TrendingUpIcon, ClockIcon, WalletIcon, Sparkles } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Banknote, BarChart2 } from 'lucide-react';
 
-const MutualFundsPage = () => {
-  const [activeTab, setActiveTab] = useState('explore');
-  const [showInvestModal, setShowInvestModal] = useState(false);
-  const [selectedFund, setSelectedFund] = useState(null);
+interface MutualFund {
+  _id: string;
+  name: string;
+  category: string;
+  riskLevel: string;
+  oneYearReturn: number;
+  threeYearReturn: number;
+  fiveYearReturn: number;
+  nav: number;
+  aum: number;
+  expense: number;
+  minInvestment: number;
+}
 
-  const handleInvestClick = (fund) => {
-    setSelectedFund(fund);
-    setShowInvestModal(true);
-  };
+interface Props {
+  onInvestClick: (fund: MutualFund) => void;
+}
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
+const getRiskColor = (riskLevel: string) => {
+  switch (riskLevel.toLowerCase()) {
+    case 'low':
+      return 'bg-green-500/10 text-green-500';
+    case 'moderate':
+      return 'bg-yellow-500/10 text-yellow-500';
+    case 'high':
+      return 'bg-red-500/10 text-red-500';
+    default:
+      return 'bg-gray-500/10 text-gray-500';
+  }
+};
+
+const getCategoryColor = (category: string) => {
+  switch (category.toLowerCase()) {
+    case 'equity':
+      return 'bg-blue-500/10 text-blue-500';
+    case 'debt':
+      return 'bg-purple-500/10 text-purple-500';
+    case 'hybrid':
+      return 'bg-orange-500/10 text-orange-500';
+    default:
+      return 'bg-gray-500/10 text-gray-500';
+  }
+};
+
+const MutualFundsDisplay = ({ onInvestClick }: Props) => {
+  const [funds, setFunds] = useState<MutualFund[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFunds = async () => {
+      try {
+        console.log('Initiating mutual funds fetch...');
+        setIsLoading(true);
+        
+        const response = await fetch('/api/mutual-funds');
+        console.log('API Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Received funds data:', data);
+        
+        if (!data.funds) {
+          throw new Error('No funds data received from API');
+        }
+
+        setFunds(data.funds);
+        setError(null);
+      } catch (error) {
+        console.error('Error fetching mutual funds:', error);
+        setError(error instanceof Error ? error.message : 'Failed to fetch mutual funds');
+      } finally {
+        setIsLoading(false);
       }
-    }
-  };
+    };
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100
-      }
-    }
-  };
+    fetchFunds();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] p-6 text-center">
+        <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
+        <h3 className="text-xl font-semibold text-red-500 mb-2">Error Loading Funds</h3>
+        <p className="text-gray-400">{error}</p>
+      </div>
+    );
+  }
+
+  if (!funds.length) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] p-6 text-center">
+        <BarChart2 className="w-12 h-12 text-gray-500 mb-4" />
+        <h3 className="text-xl font-semibold text-gray-300 mb-2">No Mutual Funds Available</h3>
+        <p className="text-gray-400">Check back later for available investment options.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0A0A0A] via-[#111827] to-[#0A0A0A] relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(26,26,26,0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(26,26,26,0.3)_1px,transparent_1px)] bg-[size:64px_64px] transform -skew-y-6"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-blue-500/5"></div>
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0.4, 0.2, 0.4] }}
-          transition={{ duration: 5, repeat: Infinity }}
-          className="absolute top-0 left-0 w-full h-full bg-gradient-conic from-purple-500/10 via-blue-500/10 to-purple-500/10"
-        />
-      </div>
-
-      <div className="container mx-auto px-4 py-12 relative z-10">
-        {/* Header Section */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+      {funds.map((fund) => (
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="text-center mb-16 relative"
+          key={fund._id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
         >
-          <motion.div 
-            variants={itemVariants}
-            className="inline-block mb-4"
-          >
-            <div className="flex items-center justify-center gap-2 mb-6">
-              <Sparkles className="w-6 h-6 text-blue-400" />
-              <span className="text-blue-400 font-semibold">Smart Investment Platform</span>
-              <Sparkles className="w-6 h-6 text-blue-400" />
-            </div>
-          </motion.div>
-          
-          <motion.h1 
-            variants={itemVariants}
-            className="text-5xl md:text-6xl font-bold mb-6"
-          >
-            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 text-transparent bg-clip-text">
-              Mutual Fund Investments
-            </span>
-          </motion.h1>
-          
-          <motion.p 
-            variants={itemVariants}
-            className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
-          >
-            Grow your wealth with AI-powered recommendations and expert insights
-          </motion.p>
+          <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm hover:bg-gray-800/70 transition-all duration-200">
+            <CardHeader>
+              <div className="flex justify-between items-start mb-2">
+                <Badge className={getCategoryColor(fund.category)}>
+                  {fund.category}
+                </Badge>
+                <Badge className={getRiskColor(fund.riskLevel)}>
+                  {fund.riskLevel} Risk
+                </Badge>
+              </div>
+              <CardTitle className="text-xl font-semibold text-gray-100">
+                {fund.name}
+              </CardTitle>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <p className="text-gray-400 text-sm">1Y Returns</p>
+                  <p className="text-green-500 font-semibold text-lg">
+                    {fund.oneYearReturn}%
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-gray-400 text-sm">3Y Returns</p>
+                  <p className="text-green-500 font-semibold text-lg">
+                    {fund.threeYearReturn}%
+                  </p>
+                </div>
+              </div>
 
-          {/* Decorative elements */}
-          <div className="absolute -top-20 -left-20 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">NAV</span>
+                  <span className="text-gray-100">₹{fund.nav.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">AUM</span>
+                  <span className="text-gray-100">₹{fund.aum}Cr</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Expense Ratio</span>
+                  <span className="text-gray-100">{fund.expense}%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Min Investment</span>
+                  <span className="text-gray-100">₹{fund.minInvestment}</span>
+                </div>
+              </div>
+
+              <Button 
+                onClick={() => onInvestClick(fund)}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold"
+              >
+                <Banknote className="w-4 h-4 mr-2" />
+                Invest Now
+              </Button>
+            </CardContent>
+          </Card>
         </motion.div>
-
-        {/* Main Navigation Tabs */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="backdrop-blur-sm bg-slate-900/30 p-8 rounded-2xl border border-gray-800/50 shadow-2xl"
-        >
-          <Tabs
-            defaultValue="explore"
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="grid grid-cols-4 gap-4 p-1 mb-8 bg-slate-800/50 rounded-xl">
-              {[
-                { value: 'explore', icon: ChartBarIcon, label: 'Explore Funds' },
-                { value: 'portfolio', icon: WalletIcon, label: 'My Portfolio' },
-                { value: 'analytics', icon: TrendingUpIcon, label: 'Analytics' },
-                { value: 'transactions', icon: ClockIcon, label: 'Transactions' }
-              ].map(({ value, icon: Icon, label }) => (
-                <TabsTrigger
-                  key={value}
-                  value={value}
-                  className="relative flex items-center gap-2 py-3 data-[state=active]:bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{label}</span>
-                  {activeTab === value && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg -z-10"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            <div className="relative">
-              <TabsContent value="explore">
-                <MutualFundsDisplay onInvestClick={handleInvestClick} />
-              </TabsContent>
-
-              <TabsContent value="portfolio">
-                <PortfolioAnalytics />
-              </TabsContent>
-
-              <TabsContent value="analytics">
-                <PortfolioAnalytics showExtendedAnalytics />
-              </TabsContent>
-
-              <TabsContent value="transactions">
-                <TransactionHistory />
-              </TabsContent>
-            </div>
-          </Tabs>
-        </motion.div>
-
-        {/* Investment Modal */}
-        {showInvestModal && (
-          <InvestmentModal 
-            fund={selectedFund}
-            isOpen={showInvestModal}
-            onClose={() => setShowInvestModal(false)}
-          />
-        )}
-      </div>
+      ))}
     </div>
   );
 };
 
-export default MutualFundsPage;
+export default MutualFundsDisplay;

@@ -1,4 +1,5 @@
-import NextAuth from "next-auth";
+// app/api/auth/[...nextauth]/route.ts
+import * as NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import dbConnect from '@/lib/database/config';
 import User from '@/models/User';
@@ -14,20 +15,27 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials, req) {
         try {
-          await dbConnect();
+          // More graceful handling of database connection
+          try {
+            await dbConnect();
+          } catch (dbError) {
+            console.error("Database connection error:", dbError);
+            return null;
+          }
+          
           console.log("Attempting login with:", credentials?.phone); // Debug log
-
+          
           const user = await User.findOne({ phone: credentials?.phone });
           if (!user) {
             console.log("No user found"); // Debug log
-            throw new Error('No user found');
+            return null;
           }
-
+          
           if (user.aadhaarNumber !== credentials?.aadhaarNumber) {
             console.log("Invalid Aadhaar"); // Debug log
-            throw new Error('Invalid credentials');
+            return null;
           }
-
+          
           console.log("Login successful for:", user.phone); // Debug log
           return {
             id: user._id.toString(),
@@ -57,7 +65,7 @@ export const authOptions: AuthOptions = {
       }
       return token;
     },
-    async session({ session, token, user }) {
+    async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.phone = token.phone as string;
@@ -65,8 +73,10 @@ export const authOptions: AuthOptions = {
       return session;
     }
   },
+  secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
 };
 
-const handler = NextAuth(authOptions);
+// Updated handler export to use NextAuth.default
+const handler = NextAuth.default(authOptions);
 export { handler as GET, handler as POST };
