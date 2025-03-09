@@ -425,7 +425,7 @@ const PortfolioAnalyticsPage = () => {
           className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
         >
           <RefreshCw className="w-4 h-4" />
-          Try Again
+          Try again
         </Button>
       </div>
     );
