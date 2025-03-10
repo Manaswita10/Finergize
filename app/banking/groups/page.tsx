@@ -11,7 +11,6 @@ import {
   TrendingUp,
   Calendar,
   Wallet,
-  ArrowUpRight,
   Settings,
   UserPlus,
   MessageSquare

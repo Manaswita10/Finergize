@@ -1,25 +1,25 @@
 import mongoose from 'mongoose';
 
 declare global {
-  // eslint-disable-next-line no-unused-vars
   interface GlobalWithMongoose {
-    mongoose: { 
-      conn: mongoose.Connection | null; 
+    mongoose: {
+      conn: mongoose.Connection | null;
       promise: Promise<mongoose.Mongoose> | null;
     } | undefined;
   }
 }
 
-// Extend NodeJS global type
 declare const global: GlobalWithMongoose;
 
-const MONGODB_URI = process.env.MONGODB_URI!;
+const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  throw new Error('Please add your MongoDB URI to .env.local');
+  throw new Error(
+    'MongoDB URI not found. Please define MONGODB_URI in your .env.local file'
+  );
 }
 
-const cached = global.mongoose ?? {
+let cached = global.mongoose ?? {
   conn: null,
   promise: null,
 };
@@ -30,27 +30,52 @@ if (!global.mongoose) {
 
 async function dbConnect(): Promise<mongoose.Connection> {
   try {
+    console.log('Connection attempt started...');
+    console.log('Connection state:', mongoose.connection.readyState);
+
     if (cached.conn) {
-      console.log('Using existing connection');
+      console.log('Using cached connection');
       return cached.conn;
     }
 
     if (!cached.promise) {
       const opts = {
         bufferCommands: false,
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
       };
 
+      console.log('Creating new connection...');
       cached.promise = mongoose.connect(MONGODB_URI, opts);
     }
 
-    const mongoose_instance = await cached.promise;
-    cached.conn = mongoose_instance.connection;
+    try {
+      const mongoose_instance = await cached.promise;
+      cached.conn = mongoose_instance.connection;
+      
+      console.log('MongoDB Connected Successfully');
+      console.log('Database:', cached.conn.name);
+      console.log('Host:', cached.conn.host);
+      
+      cached.conn.on('error', (err) => {
+        console.error('MongoDB connection error:', err);
+      });
 
-    console.log('New database connection established');
-    return cached.conn;
+      cached.conn.on('disconnected', () => {
+        console.log('MongoDB disconnected');
+        cached.conn = null;
+        cached.promise = null;
+      });
+
+      return cached.conn;
+    } catch (error) {
+      cached.promise = null;
+      throw error;
+    }
   } catch (error) {
-    console.error('Database connection error:', error);
-    throw error;
+    console.error('Detailed connection error:', error);
+    throw new Error(`Database connection failed: ${error.message}`);
   }
 }
 
