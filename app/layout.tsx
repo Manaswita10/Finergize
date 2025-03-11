@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import "@/styles/chatbot-animations.css";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import NextAuthProvider from "@/components/providers/session-provider";
+import ChatbotProvider from "@/components/providers/ChatbotProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,7 +26,9 @@ export default function RootLayout({
         <NextAuthProvider>
           <AuthProvider>
             <Navbar />
-            {children}
+            <ChatbotProvider>
+              {children}
+            </ChatbotProvider>
             <Toaster />
           </AuthProvider>
         </NextAuthProvider>
