@@ -29,6 +29,8 @@
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-tabs": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.2",
+    "@react-three/drei": "^10.0.4",
+    "@react-three/fiber": "^9.1.0",
     "@tabler/icons-react": "^3.24.0",
     "add": "^2.0.6",
     "alert": "^6.0.2",
@@ -60,8 +62,10 @@
     "react-spring": "^9.7.4",
     "recharts": "^2.13.3",
     "tailwind-merge": "^2.5.5",
+    "three": "^0.174.0",
     "web3": "^4.15.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",

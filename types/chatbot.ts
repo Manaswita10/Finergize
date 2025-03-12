@@ -1,14 +1,18 @@
 export interface ChatMessage {
-    role: 'user' | 'assistant' | 'system';
+    role: 'user' | 'assistant';
     content: string;
 }
 
 export interface ChatRequest {
     message: string;
-    history?: ChatMessage[];
+    history: ChatMessage[];
+    userInfo?: {
+        name?: string;
+        [key: string]: any;
+    } | null;
 }
 
 export interface ChatResponse {
     response: string;
-    history: ChatMessage[];
+    [key: string]: any;
 }

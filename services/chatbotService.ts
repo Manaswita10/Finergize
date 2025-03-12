@@ -4,8 +4,7 @@ const API_URL = 'https://financial-chatbot-api.onrender.com';
 
 /**
  * Sends a message to the chatbot API and returns the response
- * @param message The user's message
- * @param history Previous chat history
+ * @param request The chat request containing user message and history
  * @returns Promise with the chatbot response
  */
 export async function sendMessage(request: ChatRequest): Promise<ChatResponse> {
@@ -21,7 +20,8 @@ export async function sendMessage(request: ChatRequest): Promise<ChatResponse> {
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             throw new Error(
-                `API error: ${response.status} ${response.statusText}${errorData?.detail ? ` - ${errorData.detail}` : ''
+                `API error: ${response.status} ${response.statusText}${
+                    errorData?.detail ? ` - ${errorData.detail}` : ''
                 }`
             );
         }

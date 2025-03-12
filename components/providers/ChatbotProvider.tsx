@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import ChatbotButton from '../ChatbotButton';
-import { ChatbotContextProvider } from '@/contexts/ChatbotContext';
+import { ChatbotProvider as ChatbotContextProvider } from '@/contexts/ChatbotContext';
 
 export function ChatbotProvider({ children }: { children: React.ReactNode }) {
     return (

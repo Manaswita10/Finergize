@@ -1,11 +1,12 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ChatMessage } from '@/types/chatbot';
-import { sendMessage, sendMessageSimple } from '@/services/chatbotService';
+import { sendMessage, sendMessageSimple, fetchUserInfo } from '@/services/chatbotService';
 
 interface UseChatbotReturn {
     messages: ChatMessage[];
     isLoading: boolean;
+    userInfo: { name: string } | null;
     sendMessage: (message: string) => Promise<void>;
     reset: () => void;
 }
@@ -14,13 +15,35 @@ interface UseChatbotReturn {
  * Hook to interact with the financial advisor chatbot
  */
 export function useChatbot(initialMessage?: string): UseChatbotReturn {
-    const [messages, setMessages] = useState<ChatMessage[]>([
-        {
-            role: 'assistant',
-            content: initialMessage || "Hi there! I'm your financial advisor. How can I help you today?"
-        }
-    ]);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [userInfo, setUserInfo] = useState<{ name: string } | null>(null);
+
+    // Fetch user information when the component mounts
+    useEffect(() => {
+        const getUserInfo = async () => {
+            try {
+                const data = await fetchUserInfo();
+                setUserInfo(data);
+                
+                // Set initial message with user's name if available
+                const greeting = data?.name 
+                    ? `Hi ${data.name}! I'm your financial advisor. How can I help you today?`
+                    : `Hi there! I'm your financial advisor. How can I help you today?`;
+                
+                setMessages([{ role: 'assistant', content: greeting }]);
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+                // Set default message if user info fetch fails
+                setMessages([{ 
+                    role: 'assistant', 
+                    content: initialMessage || "Hi there! I'm your financial advisor. How can I help you today?" 
+                }]);
+            }
+        };
+
+        getUserInfo();
+    }, [initialMessage]);
 
     const sendUserMessage = useCallback(async (message: string) => {
         if (!message.trim() || isLoading) return;
@@ -39,7 +62,8 @@ export function useChatbot(initialMessage?: string): UseChatbotReturn {
 
             const request = {
                 message: message.trim(),
-                history: historyForAPI
+                history: historyForAPI,
+                userInfo: userInfo // Pass user info to API
             };
 
             // Try main API first, fall back to simple API if it fails
@@ -65,20 +89,21 @@ export function useChatbot(initialMessage?: string): UseChatbotReturn {
         } finally {
             setIsLoading(false);
         }
-    }, [messages, isLoading]);
+    }, [messages, isLoading, userInfo]);
 
     const reset = useCallback(() => {
-        setMessages([
-            {
-                role: 'assistant',
-                content: initialMessage || "Hi there! I'm your financial advisor. How can I help you today?"
-            }
-        ]);
-    }, [initialMessage]);
+        // Reset with personalized message if user info is available
+        const greeting = userInfo?.name 
+            ? `Hi ${userInfo.name}! I'm your financial advisor. How can I help you today?`
+            : initialMessage || "Hi there! I'm your financial advisor. How can I help you today?";
+            
+        setMessages([{ role: 'assistant', content: greeting }]);
+    }, [initialMessage, userInfo]);
 
     return {
         messages,
         isLoading,
+        userInfo,
         sendMessage: sendUserMessage,
         reset
     };
