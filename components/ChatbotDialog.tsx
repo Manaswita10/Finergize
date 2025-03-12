@@ -236,7 +236,7 @@ const ChatbotDialog = ({ open, onOpenChange }: ChatbotDialogProps) => {
     const handleClearChat = () => {
         const userName = session?.user?.name;
         const welcomeMessage = userName
-            ? `Hi ${userName}! I'm ${BOT_NAME}, your financial assistant. How can I help you today?`
+            ? `Hi ${userName}! I'm ${BOT_NAME}, your financial advisor. How can I help you today?`
             : `Hi there! I'm ${BOT_NAME}, your financial assistant. How can I help you today?`;
             
         resetMessages(welcomeMessage);
