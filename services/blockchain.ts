@@ -129,12 +129,18 @@ class BlockchainService {
     private async getFundDetails(fundId: string) {
         if (!this.fundDetailsCache.has(fundId)) {
             try {
-                // Try using the latest block or a specific recent block if latest doesn't work
-                const fund = await this.contract.funds(fundId, { blockTag: 'latest' });
-                this.fundDetailsCache.set(fundId, {
-                    name: fund.name,
-                    nav: ethers.utils.formatEther(fund.nav)
-                });
+                // Use getAllFunds instead of direct mapping access
+                const allFunds = await this.contract.getAllFunds({ blockTag: 'latest' });
+                const fund = allFunds.find((f: any) => f.fundId === fundId);
+                
+                if (fund) {
+                    this.fundDetailsCache.set(fundId, {
+                        name: fund.name,
+                        nav: ethers.utils.formatEther(fund.nav)
+                    });
+                } else {
+                    return { name: 'Unknown Fund', nav: '0' };
+                }
             } catch (error) {
                 console.error('Error fetching fund details:', error);
                 return { name: 'Unknown Fund', nav: '0' };
@@ -147,24 +153,19 @@ class BlockchainService {
         try {
             console.log('Checking fund status for:', fundId);
             
-            // Try multiple approaches to get fund data to handle potential network issues
-            let fund;
-            try {
-                fund = await this.contract.funds(fundId, { blockTag: 'latest' });
-            } catch (error) {
-                console.warn('Error checking fund with latest block, trying fallback:', error);
-                // Try with a specific block number as fallback
-                const blockNumber = await this.provider.getBlockNumber().catch(() => -1);
-                if (blockNumber > 0) {
-                    fund = await this.contract.funds(fundId, { blockTag: blockNumber - 1 });
-                } else {
-                    throw new Error('Unable to get block number for fund status check');
-                }
-            }
+            // Try to get all funds first
+            const allFunds = await this.contract.getAllFunds({ blockTag: 'latest' });
+            console.log('All funds fetched:', allFunds.length);
+            
+            // Find the fund with matching ID
+            const fund = allFunds.find((f: any) => f.fundId === fundId);
             
             if (!fund) {
+                console.log('Fund not found in getAllFunds results');
                 throw new Error('Fund data not available');
             }
+            
+            console.log('Found fund:', fund);
             
             return {
                 exists: true,
@@ -333,10 +334,20 @@ class BlockchainService {
                 throw new Error(`Insufficient balance. You have ${ethers.utils.formatEther(balance)} ETH but trying to invest ${amount} ETH`);
             }
 
-            const fund = await this.contract.funds(fundId, { blockTag: 'latest' });
+            // Get fund info using getAllFunds instead of direct mapping access
+            console.log('Fetching fund status for investment:', fundId);
+            const allFunds = await this.contract.getAllFunds({ blockTag: 'latest' });
+            const fund = allFunds.find((f: any) => f.fundId === fundId);
+            
+            if (!fund) {
+                throw new Error(`Fund ${fundId} not found`);
+            }
+            
             if (!fund.active) {
                 throw new Error(`Fund ${fundId} is not active`);
             }
+
+            console.log('Fund active, proceeding with investment');
 
             // Use a safe gas estimate with fallback
             let gasEstimate;
@@ -355,6 +366,7 @@ class BlockchainService {
 
             const gasLimit = gasEstimate.mul(150).div(100); // Add 50% buffer
 
+            console.log('Sending investment transaction with gas limit:', gasLimit.toString());
             const tx = await this.contract.invest(
                 fundId,
                 amountInWei,
@@ -366,7 +378,9 @@ class BlockchainService {
                 }
             );
 
+            console.log('Transaction sent, waiting for confirmation:', tx.hash);
             const receipt = await tx.wait(1);
+            console.log('Investment transaction confirmed:', receipt.transactionHash);
             return receipt;
         } catch (error: any) {
             console.error('Investment error:', error);
@@ -455,8 +469,13 @@ class BlockchainService {
                                 fundId,
                             ] = inv;
         
-                            // Get fund details
-                            const fund = await this.contract.funds(fundId);
+                            // Get fund details using getAllFunds instead of direct mapping access
+                            const allFunds = await this.contract.getAllFunds({ blockTag: 'latest' });
+                            const fund = allFunds.find((f: any) => f.fundId === fundId);
+                            
+                            // If fund not found, use default values
+                            const fundName = fund ? fund.name : "Unknown Fund";
+                            const fundNav = fund ? fund.nav : ethers.utils.parseEther("35.45");
                             
                             // Convert sipDay to number safely
                             let sipDayValue = 1;
@@ -479,7 +498,7 @@ class BlockchainService {
                             const finalAmount = parseFloat(amountInEther) > 0 ? amountInEther : "5000";
                             
                             // Get NAV and ensure it's never zero
-                            const navInEther = ethers.utils.formatEther(fund.nav);
+                            const navInEther = ethers.utils.formatEther(fundNav);
                             const finalNav = parseFloat(navInEther) > 0 ? navInEther : "35.45";
                             
                             // Calculate units
@@ -488,7 +507,7 @@ class BlockchainService {
                             return {
                                 investmentId: investmentId.toString(),
                                 fundId: fundId,
-                                fundName: fund.name,
+                                fundName: fundName,
                                 amount: finalAmount,
                                 timestamp: new Date(), // Or get from block timestamp
                                 investmentType: investmentType,

@@ -5,14 +5,18 @@ import * as hre from "hardhat";
 async function main() {
     try {
         const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
-        const signer = provider.getSigner();
-        console.log("Deploying with account:", await signer.getAddress());
+        
+        // Use account #2's private key to create a wallet
+        const privateKey = "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"; // Account #2
+        const wallet = new ethers.Wallet(privateKey, provider);
+        
+        console.log("Deploying with account:", wallet.address);
 
         const MutualFundInvestment = await hre.artifacts.readArtifact("MutualFundInvestment");
         const factory = new ethers.ContractFactory(
             MutualFundInvestment.abi,
             MutualFundInvestment.bytecode,
-            signer
+            wallet
         );
 
         console.log("Deploying MutualFundInvestment...");
