@@ -61,6 +61,7 @@
     "react-qr-code": "^2.0.15",
     "react-spring": "^9.7.4",
     "recharts": "^2.13.3",
+    "simplex-noise": "^4.0.3",
     "tailwind-merge": "^2.5.5",
     "three": "^0.174.0",
     "web3": "^4.15.0",

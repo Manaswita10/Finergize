@@ -5,6 +5,7 @@ import "@/styles/chatbot-animations.css";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { UserProvider } from "@/contexts/UserContext"; // Add this import
 import NextAuthProvider from "@/components/providers/session-provider";
 import ChatbotProvider from "@/components/providers/ChatbotProvider";
 
@@ -25,11 +26,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <NextAuthProvider>
           <AuthProvider>
-            <Navbar />
-            <ChatbotProvider>
-              {children}
-            </ChatbotProvider>
-            <Toaster />
+            <UserProvider> {/* Add the UserProvider here */}
+              <Navbar />
+              <ChatbotProvider>
+                {children}
+              </ChatbotProvider>
+              <Toaster />
+            </UserProvider>
           </AuthProvider>
         </NextAuthProvider>
       </body>

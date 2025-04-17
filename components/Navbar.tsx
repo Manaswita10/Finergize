@@ -33,7 +33,7 @@ const navItems = [
   },
   {
     path: "/security",
-    label: "Security",
+    label: "Mutual Funds",
   },
   {
     path: "/analytics",
@@ -123,12 +123,12 @@ export default function Navbar() {
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="outline" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10">
+                  <Button variant="outline" className="border-blue-500/50 text-blue-400 hover:text-blue-300 hover:bg-blue-500/5 hover:border-blue-400/50">
                     Login
                   </Button>
                 </Link>
                 <Link href="/register">
-                  <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90">
+                  <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 hover:opacity-95">
                     Register
                   </Button>
                 </Link>
@@ -141,7 +141,7 @@ export default function Navbar() {
             <Button
               variant="outline"
               size="icon"
-              className="border-gray-800"
+              className="border-gray-800 hover:bg-gray-800/50 hover:border-gray-700"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? (
@@ -173,13 +173,13 @@ export default function Navbar() {
                     <Link href="banking/profile">
                       <Button 
                         variant="outline" 
-                        className="w-full border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                        className="w-full border-blue-500/50 text-blue-400 hover:text-blue-300 hover:bg-blue-500/5 hover:border-blue-400/50"
                       >
                         {session?.user?.name || 'My Profile'}
                       </Button>
                     </Link>
                     <Button 
-                      className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90"
+                      className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 hover:opacity-95"
                       onClick={handleLogout}
                     >
                       Logout
@@ -190,14 +190,14 @@ export default function Navbar() {
                     <Link href="/login">
                       <Button 
                         variant="outline" 
-                        className="w-full border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                        className="w-full border-blue-500/50 text-blue-400 hover:text-blue-300 hover:bg-blue-500/5 hover:border-blue-400/50"
                       >
                         Login
                       </Button>
                     </Link>
                     <Link href="/register">
                       <Button 
-                        className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90"
+                        className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 hover:opacity-95"
                       >
                         Register
                       </Button>

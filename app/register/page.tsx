@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { signIn } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Languages, Check, Lock } from 'lucide-react';
+import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-collision";
 
 // Animation variants
 const pageVariants = {
@@ -53,48 +54,6 @@ interface FormData {
   aadhaarNumber: string;
   preferredLanguage: string;
 }
-
-const AnimatedGradientBackground = () => (
-  <div className="fixed inset-0 -z-10">
-    {/* Main gradient */}
-    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-900/30 via-gray-900 to-black"></div>
-    
-    {/* Animated orbs */}
-    <motion.div 
-      className="absolute w-[1000px] h-[1000px] -left-[400px] -top-[400px] rounded-full bg-blue-500/10 blur-[120px]"
-      animate={{
-        scale: [1, 1.2, 1],
-        opacity: [0.1, 0.2, 0.1],
-      }}
-      transition={{
-        duration: 10,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }}
-    />
-    <motion.div 
-      className="absolute w-[1000px] h-[1000px] -right-[400px] -bottom-[400px] rounded-full bg-purple-500/10 blur-[120px]"
-      animate={{
-        scale: [1.2, 1, 1.2],
-        opacity: [0.2, 0.1, 0.2],
-      }}
-      transition={{
-        duration: 10,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }}
-    />
-    
-    {/* Grid overlay */}
-    <div className="absolute inset-0 bg-grid-white/[0.02]" />
-    
-    {/* Decorative lines */}
-    <div className="absolute inset-0">
-      <div className="absolute top-1/4 w-full h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-      <div className="absolute bottom-1/4 w-full h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
-    </div>
-  </div>
-);
 
 const InputField = ({ label, id, ...props }: { label: string; id: string; [key: string]: any }) => (
   <motion.div 
@@ -213,27 +172,18 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black relative">
-      <AnimatedGradientBackground />
-      
-      <main className="relative pt-24 pb-12">
+    <BackgroundBeamsWithCollision className="min-h-screen bg-black dark:from-purple-950 dark:to-gray-900">
+      <main className="pt-24 pb-12">
         <div className="container max-w-2xl mx-auto px-4">
-          {/* Security Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-center gap-2 mb-6 p-3 rounded-lg bg-gray-900/50 border border-gray-800/50 backdrop-blur-sm w-fit mx-auto"
-          >
-            <Shield className="h-5 w-5 text-purple-500" />
-            <span className="text-sm text-gray-300">Secured Registration Process</span>
-          </motion.div>
+         
 
           <motion.div
             variants={pageVariants}
             initial="hidden"
             animate="visible"
+            className="relative z-10"
           >
-            <Card className="bg-gray-900/40 border-gray-800/50 backdrop-blur-sm overflow-hidden">
+            <Card className="bg-gray-900/60 border-gray-800/50 backdrop-blur-md overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-blue-500/5" />
               
               <CardHeader className="relative">
@@ -282,9 +232,9 @@ export default function RegisterPage() {
                     />
 
                     <InputField
-                      label="Village"
+                      label="City"
                       id="village"
-                      placeholder="Your village name"
+                      placeholder="Your  city name"
                       value={formData.village}
                       onChange={handleInputChange}
                       required
@@ -443,6 +393,6 @@ export default function RegisterPage() {
           </AnimatePresence>
         </div>
       </main>
-    </div>
+    </BackgroundBeamsWithCollision>
   );
 }

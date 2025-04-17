@@ -35,7 +35,7 @@
     "test/**/*.ts",
     "typechain/**/*.ts",
     "typechain/**/*.d.ts"
-  ],
+, "hooks/useAuthModal.ts", "scripts/community.mjs"  ],
   "exclude": ["node_modules"],
   "ts-node": {
     "compilerOptions": {

@@ -574,33 +574,26 @@ export default function Home(): JSX.Element {
               </span>
             </motion.div>
 
-            {/* 3D Logo Section */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1.2, type: "spring" }}
-              className="relative mb-2 w-full"
-            >
-              <div className="max-w-md mx-auto h-[300px]">
-                <ClientOnly>
-                  <Suspense fallback={
-                    <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 animate-pulse flex items-center justify-center">
-                      <div className="w-28 h-28 rounded-full bg-gray-900 flex items-center justify-center">
-                        <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">F</span>
-                      </div>
-                    </div>
-                  }>
-                    <AnimatedLogo />
-                  </Suspense>
-                </ClientOnly>
-              </div>
-              
-              {/* Animated glows behind the logo */}
-              <div className="absolute inset-0 pointer-events-none -z-10">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-              </div>
-            </motion.div>
+           {/* 3D Logo Section */}
+<motion.div
+  initial={{ opacity: 0, scale: 0.8 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ duration: 1.2, type: "spring" }}
+  className="relative mb-2 w-full"
+>
+  <div className="max-w-md mx-auto h-[300px]">
+    <ClientOnly>
+      {/* Remove the Suspense wrapper since we're handling loading states in the AnimatedLogo component */}
+      <AnimatedLogo />
+    </ClientOnly>
+  </div>
+  
+  {/* Animated glows behind the logo */}
+  <div className="absolute inset-0 pointer-events-none -z-10">
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+  </div>
+</motion.div>
 
             <motion.h1 
               className="font-bold mb-6"
