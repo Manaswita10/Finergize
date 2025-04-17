@@ -174,7 +174,7 @@ const SketchfabModel: React.FC<SketchfabModelProps> = ({ modelPath }) => {
       ref={containerRef} 
       className="w-full h-full min-h-[300px] relative"
     >
-      {/* Loading indicator */}
+      {/* Loading indicator - for loading*/}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <div className="w-12 h-12 rounded-full border-4 border-blue-500/20 border-t-blue-500 animate-spin"></div>
