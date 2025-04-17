@@ -3,7 +3,7 @@ import React from 'react';
 interface TransactionProps {
   transaction: {
     id: string;
-    type: 'send' | 'receive' | 'deposit' | 'withdrawal';
+    type: 'send' | 'receive' | 'deposit' | 'withdraw';
     amount: number;
     with: string;
     timestamp: string;
